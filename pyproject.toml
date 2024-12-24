@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "aws-serverless"   # Project name
+version = "1.0.0"          # Version
+description = "AWS serverless project"  # Description
+authors = ["md juber"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11"           # Specify Python version
+boto3 = "^1.35.86"        # Example dependency (adjust as needed)
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+

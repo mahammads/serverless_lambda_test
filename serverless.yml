@@ -1,0 +1,54 @@
+service: Read-data-from-s3-bucket # Name of the service
+
+frameworkVersion: "4.4"
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1 # Specify the AWS region
+  profile: aws-profile
+  stage: dev
+
+  environment:
+    MY_ENV_VAR: "Hello, Serverless!" # Define environment variables
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:GetObject" # Example permissions
+            - "s3:PutObject"
+          Resource: "arn:aws:s3:::sns-notifier-test-bucket-serverless/*"
+
+functions:
+  readS3Data:
+    handler: functions/read-s3-data/handler.read_s3_data # Path to the function in the `functions` folder
+    events:
+      - s3:
+          bucket: sns-notifier-test-bucket-serverless
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .txt
+
+resources:
+  Resources:
+    S3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: sns-notifier-test-bucket-serverless
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service: "lambda.amazonaws.com"  # Correct service for Lambda invocation
+              Action: 
+                - "s3:GetObject"  # Allow reading objects from the S3 bucket
+              Resource: "arn:aws:s3:::sns-notifier-test-bucket-serverless/*"  # Grant access to all objects in the bucket
+              Condition:
+                ArnLike:
+                  aws:SourceArn: "arn:aws:s3:::sns-notifier-test-bucket-serverless"
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
